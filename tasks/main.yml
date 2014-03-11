@@ -23,7 +23,7 @@
 
 - name: Aptitude | Make sure the required packages are installed
   apt:
-    pkg="{{ item }} "
+    pkg={{ item }}
     state=present
   with_items:
     - python-apt
