@@ -11,7 +11,7 @@
 - name: Aptitude | Update the apt cache
   apt:
     update_cache=yes
-    cache_valid_time: "{{ apt_cache_valid_time }}"
+    cache_valid_time="{{ apt_cache_valid_time }}"
 
 - name: Aptitude | Update the general configuration (/etc/apt/apt.conf.ds/10general)
   template:
@@ -23,7 +23,7 @@
 
 - name: Aptitude | Make sure the required packages are installed
   apt:
-    pkg={{ item }}
+    pkg="{{ item }}"
     state=present
   with_items:
     - python-apt
