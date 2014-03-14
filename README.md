@@ -8,9 +8,11 @@ Ansible role which executes apt-get update to ensure the local APT package cache
 ```yaml
 apt_reset_source_list: no         # reset the /etc/apt/sources.list to the default
 apt_cache_valid_time: 3600        # Time (in seconds) the apt cache stays valid
-apt_install_recommends: yes       # whether or not to install the "recommended" packages
-apt_install_suggests: yes         # whether or not to install the "suggested" packages
+apt_install_recommends: no        # whether or not to install the "recommended" packages
+apt_install_suggests: no          # whether or not to install the "suggested" packages
 ```
+
+Remark: Beware that setting `apt_install_recommends` and `apt_install_suggests` to `yes` may heavily increase the apt-requirements (and hence disk usage). You should proceed cautiously changing these.
 
 
 #### License
