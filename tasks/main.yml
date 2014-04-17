@@ -16,9 +16,11 @@
 
 - name: APT | Remove packages that are no longer needed for dependencies
   shell: apt-get -y autoremove
+  when: apt_autoremove
 
 - name: APT | Remove .deb files for packages no longer on your system
   shell: apt-get -y autoclean
+  when: apt_autoclean
 
 - name: APT | Update the general configuration (/etc/apt/apt.conf.ds/10general)
   template:
