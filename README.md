@@ -12,6 +12,9 @@ apt_install_recommends: no        # whether or not to install the "recommended" 
 apt_install_suggests: no          # whether or not to install the "suggested" packages
 apt_autoremove: yes               # remove packages that are no longer needed for dependencies
 apt_autoclean: yes                # remove .deb files for packages no longer on your system
+apt_default_packages:
+  - python-apt
+  - unattended-upgrades
 ```
 
 Remark: Beware that setting `apt_install_recommends` and `apt_install_suggests` to `yes` may heavily increase the apt-requirements (and hence disk usage). You should proceed cautiously changing these.
