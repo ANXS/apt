@@ -34,6 +34,4 @@
   apt:
     pkg: "{{item}}"
     state: present
-  with_items:
-    - python-apt
-    - unattended-upgrades
+  with_items: apt_default_packages

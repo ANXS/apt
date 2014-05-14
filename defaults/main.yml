@@ -6,3 +6,6 @@ apt_install_recommends: no        # whether or not to install the "recommended" 
 apt_install_suggests: no          # whether or not to install the "suggested" packages
 apt_autoremove: yes               # remove packages that are no longer needed for dependencies
 apt_autoclean: yes                # remove .deb files for packages no longer on your system
+apt_default_packages:
+  - python-apt
+  - unattended-upgrades
