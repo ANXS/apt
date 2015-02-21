@@ -1,8 +1,8 @@
 # file: apt/tasks/main.yml
 
 - name: APT | Reset the sources list (/etc/apt/sources.list)
-  copy:
-    src: etc_apt_sources.list
+  template:
+    src: etc_apt_sources.list.j2
     dest: /etc/apt/sources.list
     owner: root
     group: root
