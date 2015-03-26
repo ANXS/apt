@@ -21,6 +21,12 @@ apt_default_packages:
 Remark: Beware that setting `apt_install_recommends` and `apt_install_suggests` to `yes` may heavily increase the apt-requirements (and hence disk usage). You should proceed cautiously changing these.
 
 
+#### Testing
+This project comes with a VagrantFile, this is a fast and easy way to test changes to the role, fire it up with `vagrant up`
+
+See [vagrant docs](https://docs.vagrantup.com/v2/) for getting setup with vagrant
+
+
 #### License
 
 Licensed under the MIT License. See the LICENSE file for details.
