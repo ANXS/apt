@@ -17,14 +17,14 @@
 - name: APT | Remove packages that are no longer needed for dependencies
   shell: apt-get -y autoremove
   when: apt_autoremove
-  register: output
-  changed_when: "'0 upgraded, 0 newly installed, 0 to remove' not in output.stdout and 'not upgraded' not in output.stdout"
+  register: autoremove_output
+  changed_when: "'0 upgraded, 0 newly installed, 0 to remove' not in autoremove_output.stdout and 'not upgraded' not in autoremove_output.stdout"
 
 - name: APT | Remove .deb files for packages no longer on your system
   shell: apt-get -y autoclean
   when: apt_autoclean
-  register: output
-  changed_when: "'Del' in output.stdout"
+  register: autoclean_output
+  changed_when: "'Del' in autoclean_output.stdout"
 
 - name: APT | Update the general configuration (/etc/apt/apt.conf.ds/10general)
   template:
