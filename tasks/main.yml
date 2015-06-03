@@ -26,6 +26,16 @@
   register: autoclean_output
   changed_when: "'Del' in autoclean_output.stdout"
 
+- name: APT | Check for cached .deb files
+  shell: "ls /var/cache/apt/archives/*.deb 2&> /dev/null | wc -l"
+  register: apt_cache_check
+  changed_when: apt_cache_check.stdout != "0"
+  when: apt_clean
+
+- name: APT | Remove all cached .deb files
+  shell: apt-get -y clean
+  when: apt_clean and apt_cache_check.stdout != "0"
+
 - name: APT | Update the general configuration (/etc/apt/apt.conf.ds/10general)
   template:
     src: etc_apt_apt.conf.d_10general.j2
