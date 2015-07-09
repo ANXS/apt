@@ -29,11 +29,12 @@
 - name: APT | Check for cached .deb files
   shell: "ls /var/cache/apt/archives/*.deb 2&> /dev/null | wc -l"
   register: apt_cache_check
-  changed_when: apt_cache_check.stdout != "0"
+  changed_when: no
   when: apt_clean
 
 - name: APT | Remove all cached .deb files
   shell: apt-get -y clean
+  changed_when: apt_cache_check.stdout != "0"
   when: apt_clean and apt_cache_check.stdout != "0"
 
 - name: APT | Update the general configuration (/etc/apt/apt.conf.ds/10general)
