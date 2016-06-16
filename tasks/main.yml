@@ -49,4 +49,4 @@
   apt:
     pkg: "{{item}}"
     state: present
-  with_items: apt_default_packages
+  with_items: "{{apt_default_packages}}"
