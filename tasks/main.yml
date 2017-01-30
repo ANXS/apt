@@ -37,7 +37,7 @@
   changed_when: apt_cache_check.stdout != "0"
   when: apt_clean and apt_cache_check.stdout != "0"
 
-- name: APT | Update the general configuration (/etc/apt/apt.conf.ds/10general)
+- name: APT | Update the general configuration (/etc/apt/apt.conf.d/10general)
   template:
     src: etc_apt_apt.conf.d_10general.j2
     dest: /etc/apt/apt.conf.d/10general
