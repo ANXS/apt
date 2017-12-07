@@ -13,3 +13,8 @@ apt_autoclean: yes                        # remove .deb files for packages no lo
 apt_default_packages:
   - python-apt
   - unattended-upgrades
+  - apt-transport-https
+  - curl
+  - ca-certificates
+  - software-properties-common
+apt_release: precise                      # What release to pull from
