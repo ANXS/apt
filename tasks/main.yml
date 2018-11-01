@@ -15,16 +15,14 @@
     cache_valid_time: "{{apt_cache_valid_time}}"
 
 - name: APT | Remove packages that are no longer needed for dependencies
-  shell: apt-get -y autoremove
+  apt:
+    autoremove: "yes"
   when: apt_autoremove
-  register: autoremove_output
-  changed_when: "'0 upgraded, 0 newly installed, 0 to remove' not in autoremove_output.stdout and 'not upgraded' not in autoremove_output.stdout"
 
 - name: APT | Remove .deb files for packages no longer on your system
-  shell: apt-get -y autoclean
+  apt:
+    autoclean: "yes"
   when: apt_autoclean
-  register: autoclean_output
-  changed_when: "'Del' in autoclean_output.stdout"
 
 - name: APT | Check for cached .deb files
   shell: "ls /var/cache/apt/archives/*.deb 2&> /dev/null | wc -l"
@@ -47,6 +45,5 @@
 
 - name: APT | Make sure the required packages are installed
   apt:
-    pkg: "{{item}}"
+    pkg: "{{apt_default_packages}}"
     state: present
-  with_items: "{{apt_default_packages}}"
