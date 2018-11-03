@@ -16,12 +16,12 @@
 
 - name: APT | Remove packages that are no longer needed for dependencies
   apt:
-    autoremove: true
+    autoremove: "yes"
   when: apt_autoremove
 
 - name: APT | Remove .deb files for packages no longer on your system
   apt:
-    autoclean: true
+    autoclean: "yes"
   when: apt_autoclean
 
 - name: APT | Check for cached .deb files
@@ -45,6 +45,5 @@
 
 - name: APT | Make sure the required packages are installed
   apt:
-    pkg: "{{item}}"
+    pkg: "{{apt_default_packages}}"
     state: present
-  with_items: "{{apt_default_packages}}"

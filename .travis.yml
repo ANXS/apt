@@ -3,8 +3,8 @@ language: python
 python: "2.7"
 env:
   matrix:
-    - ANSIBLE_VERSION="2.3.2"
-    - ANSIBLE_VERSION="2.4.2.0"
+    - ANSIBLE_VERSION="2.3"
+    - ANSIBLE_VERSION="2.7.0"
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq python-apt python-pycurl
@@ -13,9 +13,11 @@ install:
 script:
   - echo localhost > inventory
   - ansible-playbook -i inventory test.yml --syntax-check
-  - ansible-playbook -i inventory test.yml --connection=local --sudo
+  - ansible-playbook -i inventory test.yml --connection=local --become
   - >
-    ansible-playbook -i inventory test.yml --connection=local --sudo
+    ansible-playbook -i inventory test.yml --connection=local --become
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
