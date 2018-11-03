@@ -1,4 +1,4 @@
-## ANXS - apt [![Build Status](https://travis-ci.org/ANXS/apt.png)](https://travis-ci.org/ANXS/apt)
+## ANXS - apt [![Build Status](https://travis-ci.com/ANXS/apt.png)](https://travis-ci.com/ANXS/apt)
 
 Ansible role which executes apt-get update to ensure the local APT package cache is up to date. At the same time, it cleans it from packages and .deb files which are no longer needed.
 
