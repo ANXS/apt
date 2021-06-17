@@ -1,49 +1,48 @@
-# file: apt/tasks/main.yml
-
-- name: APT | Reset the sources list (/etc/apt/sources.list)
+---
+- name: "Reset the sources list (/etc/apt/sources.list)"
   template:
-    src: etc_apt_sources.list.j2
-    dest: /etc/apt/sources.list
-    owner: root
-    group: root
-    mode: 0644
+    src: "etc_apt_sources.list.j2"
+    dest: "/etc/apt/sources.list"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   when: apt_reset_source_list
 
-- name: APT | Update the apt cache
+- name: "Update the apt cache"
   apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: "{{apt_cache_valid_time}}"
 
-- name: APT | Remove packages that are no longer needed for dependencies
+- name: "Remove packages that are no longer needed for dependencies"
   apt:
-    autoremove: "yes"
+    autoremove: true
   when: apt_autoremove
 
-- name: APT | Remove .deb files for packages no longer on your system
+- name: "Remove .deb files for packages no longer on your system"
   apt:
-    autoclean: "yes"
+    autoclean: true
   when: apt_autoclean
 
-- name: APT | Check for cached .deb files
+- name: "Check for cached .deb files"
   shell: "ls /var/cache/apt/archives/*.deb 2&> /dev/null | wc -l"
   register: apt_cache_check
-  changed_when: no
+  changed_when: false
   when: apt_clean
 
-- name: APT | Remove all cached .deb files
+- name: "Remove all cached .deb files"
   shell: apt-get -y clean
   changed_when: apt_cache_check.stdout != "0"
   when: apt_clean and apt_cache_check.stdout != "0"
 
-- name: APT | Update the general configuration (/etc/apt/apt.conf.d/10general)
+- name: "Update the general configuration (/etc/apt/apt.conf.d/10general)"
   template:
-    src: etc_apt_apt.conf.d_10general.j2
-    dest: /etc/apt/apt.conf.d/10general
-    owner: root
-    group: root
-    mode: 0644
+    src: "etc_apt_apt.conf.d_10general.j2"
+    dest: "/etc/apt/apt.conf.d/10general"
+    owner: "root"
+    group: "root"
+    mode: "0644"
 
-- name: APT | Make sure the required packages are installed
+- name: "Make sure the required packages are installed"
   apt:
     pkg: "{{apt_default_packages}}"
-    state: present
+    state: "present"

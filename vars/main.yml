@@ -1,0 +1,8 @@
+---
+apt_default_packages:
+  - "python3-apt"
+  - "unattended-upgrades"
+  - "apt-transport-https"
+  - "curl"
+  - "ca-certificates"
+  - "software-properties-common"
