@@ -43,7 +43,17 @@
     group: root
     mode: 0644
 
-- name: APT | Make sure the required packages are installed
+- name: APT | Make sure the required packages are installed 20.04 and above
+  set_fact:
+    apt_packages_list: "{{ apt_default_packages }} + {{ apt_default_packages_post20 }}"
+  when: ansible_facts['distribution_version'] is version('20.04', '>=')
+
+- name: APT | Make sure the required packages are installed 19.10 and below
+  set_fact:
+    apt_packages_list: "{{ apt_default_packages }} + {{ apt_default_packages_pre20 }}"
+  when: ansible_facts['distribution_version'] is version('20.04', '<')
+
+- name: APT | Install Packages
   apt:
-    pkg: "{{apt_default_packages}}"
+    pkg: "{{apt_packages_list}}"
     state: present
