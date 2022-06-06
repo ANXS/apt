@@ -7,3 +7,5 @@ Icon
 .Trashes
 .vagrant
 test
+.history
+.vscode
