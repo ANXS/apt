@@ -11,10 +11,14 @@ apt_autoremove_recommends: yes            # whether to automatically remove "rec
 apt_autoremove_suggests: yes              # whether to automatically remove "suggested" packages
 apt_autoclean: yes                        # remove .deb files for packages no longer on your system
 apt_default_packages:
-  - python-apt
+  - python3-apt
   - unattended-upgrades
   - apt-transport-https
   - curl
   - ca-certificates
   - software-properties-common
-apt_release: precise                      # What release to pull from
+apt_default_packages_post20:
+  - python3-apt
+apt_default_packages_pre20:
+  - python-apt
+apt_release: jammy                      # What release to pull from
