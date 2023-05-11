@@ -45,12 +45,12 @@
 
 - name: APT | Make sure the required packages are installed 20.04 and above
   set_fact:
-    apt_packages_list: "{{ apt_default_packages }} + {{ apt_default_packages_post20 }}"
+    apt_packages_list: "{{ apt_default_packages | union (apt_default_packages_post20) | unique }}"
   when: ansible_facts['distribution_version'] is version('20.04', '>=')
 
 - name: APT | Make sure the required packages are installed 19.10 and below
   set_fact:
-    apt_packages_list: "{{ apt_default_packages }} + {{ apt_default_packages_pre20 }}"
+    apt_packages_list: "{{ apt_default_packages | union (apt_default_packages_pre20) | unique }}"
   when: ansible_facts['distribution_version'] is version('20.04', '<')
 
 - name: APT | Install Packages
