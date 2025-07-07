@@ -6,3 +6,9 @@ apt_default_packages:
   - "curl"
   - "ca-certificates"
   - "software-properties-common"
+
+apt_upgrade_lock_boot: "/var/run/anxs-apt-upgrade"
+apt_upgrade_lock_once: "/var/cache/anxs/apt-upgrade"
+apt_upgrade_fake:
+  stat:
+    exists: false

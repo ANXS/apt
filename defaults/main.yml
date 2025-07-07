@@ -10,3 +10,6 @@ apt_autoremove_recommends: true            # whether to automatically remove "re
 apt_autoremove_suggests: true              # whether to automatically remove "suggested" packages
 apt_autoclean: true                        # remove .deb files for packages no longer on your system
 apt_source: false
+apt_upgrade: false
+apt_upgrade_style: "safe"   # or "full" or "dist"
+apt_upgrade_frequency: "once" # or "boot" or "always"

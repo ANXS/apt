@@ -1,4 +1,13 @@
 ---
+- name: "Wait until frontend lock file is not being held"
+  command: "lsof /var/lib/dpkg/lock-frontend"
+  register: apt_lock_result
+  failed_when: false
+  changed_when: false
+  retries: 60
+  delay: 5
+  until: apt_lock_result.rc == 1
+
 - name: "Reset the sources list (/etc/apt/sources.list)"
   template:
     src: "etc_apt_sources.list.j2"
@@ -12,6 +21,50 @@
   apt:
     update_cache: true
     cache_valid_time: "{{apt_cache_valid_time}}"
+
+- name: "Check if we ever upgraded"
+  stat:
+    path: "{{apt_upgrade_lock_once}}"
+  register: apt_upgrade_once_results
+  when: apt_upgrade_frequency == "once"
+
+- name: "Check if we upgraded this boot"
+  stat:
+    path: "{{apt_upgrade_lock_boot}}"
+  register: apt_upgrade_boot_results
+  when: apt_upgrade_frequency == "boot"
+
+- name: "Upgrade packages"
+  apt:
+    upgrade: "{{apt_upgrade_style}}"
+  when: >-
+    apt_upgrade
+    and (apt_upgrade_frequency == "always"
+    or (apt_upgrade_frequency == "boot" and not
+      (apt_upgrade_boot_results|default(apt_upgrade_fake)).stat.exists)
+    or (apt_upgrade_frequency == "once" and not
+      (apt_upgrade_once_results|default(apt_upgrade_fake)).stat.exists))
+  register: apt_upgrade_results
+
+- name: "Create anxs cache directory"
+  file:
+    path: "/var/cache/anxs"
+    state: "directory"
+    owner: "root"
+    group: "root"
+  when: apt_upgrade and apt_upgrade_frequency == "once" and apt_upgrade_results.changed
+
+- name: "Note that apt upgrade happened once"
+  file:
+    path: "{{apt_upgrade_lock_once}}"
+    state: "touch"
+  when: apt_upgrade and apt_upgrade_frequency == "once" and apt_upgrade_results.changed
+
+- name: "Note that apt upgrade happened this boot"
+  file:
+    path: "{{apt_upgrade_lock_boot}}"
+    state: "touch"
+  when: apt_upgrade and apt_upgrade_frequency == "boot" and apt_upgrade_results.changed
 
 - name: "Remove packages that are no longer needed for dependencies"
   apt:
