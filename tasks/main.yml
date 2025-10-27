@@ -1,6 +1,6 @@
 ---
 - name: "Wait until frontend lock file is not being held"
-  command: "lsof /var/lib/dpkg/lock-frontend"
+  command: "fuser /var/lib/dpkg/lock-frontend"
   register: apt_lock_result
   failed_when: false
   changed_when: false
