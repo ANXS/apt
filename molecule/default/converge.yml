@@ -7,7 +7,5 @@
     apt_upgrade: "{{ lookup('env', 'APT_UPGRADE') | default('false', true) | bool }}"
     apt_upgrade_style: "{{ lookup('env', 'APT_UPGRADE_STYLE') | default('safe', true) }}"
     apt_upgrade_frequency: "{{ lookup('env', 'APT_UPGRADE_FREQUENCY') | default('once', true) }}"
-  tasks:
-    - name: Include anxs-apt role
-      ansible.builtin.include_role:
-        name: anxs-apt
+  roles:
+    - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(playbook_dir + '/../..', true) }}"
