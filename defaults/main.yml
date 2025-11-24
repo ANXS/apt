@@ -1,15 +1,15 @@
 ---
 apt_reset_source_list: false                 # reset the /etc/apt/sources.list to the default
-apt_mirror_url: "http://archive.ubuntu.com" # the mirror from where to install packages
-apt_cache_valid_time: 3600                # Time (in seconds) the apt cache stays valid
+apt_mirror_url: "http://archive.ubuntu.com"  # the mirror from where to install packages
+apt_cache_valid_time: 3600                   # Time (in seconds) the apt cache stays valid
 apt_install_recommends: false                # whether or not to install the "recommended" packages
 apt_install_suggests: false                  # whether or not to install the "suggested" packages
-apt_autoremove: true                       # remove packages that are no longer needed for dependencies
+apt_autoremove: true                         # remove packages that are no longer needed for dependencies
 apt_clean: false                             # remove all cached .deb files
-apt_autoremove_recommends: true            # whether to automatically remove "recommended" packages
-apt_autoremove_suggests: true              # whether to automatically remove "suggested" packages
-apt_autoclean: true                        # remove .deb files for packages no longer on your system
-apt_source: false
-apt_upgrade: false
-apt_upgrade_style: "safe"   # or "full" or "dist"
-apt_upgrade_frequency: "once" # or "boot" or "always"
+apt_autoremove_recommends: true              # whether to automatically remove "recommended" packages
+apt_autoremove_suggests: true                # whether to automatically remove "suggested" packages
+apt_autoclean: true                          # remove .deb files for packages no longer on your system
+apt_source: false                            # include apt source repos
+apt_upgrade: false                           # perform some automatic upgrades
+apt_upgrade_style: "safe"                    # or "full" or "dist"
+apt_upgrade_frequency: "once"                # or "boot" or "always"

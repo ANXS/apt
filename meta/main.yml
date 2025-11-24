@@ -1,9 +1,11 @@
 ---
 galaxy_info:
+  role_name: "apt"
+  namespace: "anxs"
   author: "ANXS Crew"
   company: "ANXS"
   description: "Manages apt and executes apt-get update to ensure the local APT package cache is up to date."
-  min_ansible_version: 2.13
+  min_ansible_version: "2.13"
   license: "MIT"
   platforms:
     - name: "Ubuntu"
@@ -14,8 +16,6 @@ galaxy_info:
       versions:
         - "trixie"
         - "bookworm"
-  categories:
+  galaxy_tags:
     - "system"
-
-dependencies:
-  - "ANXS.python"
+    - "apt"

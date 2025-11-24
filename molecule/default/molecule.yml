@@ -1,0 +1,47 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+platforms:
+  - name: "anxs-apt-${MOLECULE_OS:-debian}-${MOLECULE_VERSION:-12}-${APT_UPGRADE:-false}-${APT_UPGRADE_STYLE:-safe}-${APT_UPGRADE_FREQUENCY:-once}"
+    image: "${MOLECULE_IMAGE:-geerlingguy/docker-debian12-ansible:latest}"
+    privileged: true
+    pre_build_image: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      remote_tmp: /tmp/.ansible/tmp
+  playbooks:
+    converge: converge.yml
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/../../..:${MOLECULE_PROJECT_DIRECTORY}/..:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles"
+    APT_UPGRADE: "${APT_UPGRADE:-false}"
+    APT_UPGRADE_STYLE: "${APT_UPGRADE_STYLE:-safe}"
+    APT_UPGRADE_FREQUENCY: "${APT_UPGRADE_FREQUENCY:-once}"
+
+verifier:
+  name: testinfra
+  directory: tests
+  env:
+    APT_UPGRADE: "${APT_UPGRADE:-false}"
+    APT_UPGRADE_FREQUENCY: "${APT_UPGRADE_FREQUENCY:-once}"
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - converge
+    - idempotence
+    - verify
+    - destroy

@@ -1,0 +1,18 @@
+---
+profile: production
+
+exclude_paths:
+  - .cache/
+  - .github/
+  - molecule/
+
+offline: false
+
+supported_ansible_also:
+  - ">=2.12"
+
+verbosity: 1
+
+warn_list:
+  - experimental
+  - yaml[truthy]
