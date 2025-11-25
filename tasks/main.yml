@@ -1,59 +1,129 @@
-# file: apt/tasks/main.yml
+---
+- name: "Check if fuser is available"
+  ansible.builtin.command: which fuser
+  register: apt_fuser_check
+  failed_when: false
+  changed_when: false
 
-- name: APT | Reset the sources list (/etc/apt/sources.list)
-  template:
-    src: etc_apt_sources.list.j2
-    dest: /etc/apt/sources.list
-    owner: root
-    group: root
-    mode: 0644
+- name: "Wait until frontend lock file is not being held"
+  ansible.builtin.command: fuser /var/lib/dpkg/lock-frontend
+  register: apt_lock_result
+  failed_when: false
+  changed_when: false
+  retries: 60
+  delay: 5
+  until: apt_lock_result.rc == 1
+  when: apt_fuser_check.rc == 0
+
+- name: "Reset the sources list (/etc/apt/sources.list)"
+  ansible.builtin.template:
+    src: "etc_apt_sources.list.j2"
+    dest: "/etc/apt/sources.list"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   when: apt_reset_source_list
 
-- name: APT | Update the apt cache
-  apt:
-    update_cache: yes
-    cache_valid_time: "{{apt_cache_valid_time}}"
+- name: "Update the apt cache"
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: "{{ apt_cache_valid_time }}"
 
-- name: APT | Remove packages that are no longer needed for dependencies
-  apt:
-    autoremove: "yes"
+- name: "Check if we ever upgraded"
+  ansible.builtin.stat:
+    path: "{{ apt_upgrade_lock_once }}"
+  register: apt_upgrade_once_results
+  when: apt_upgrade_frequency == "once"
+
+- name: "Check if we upgraded this boot"
+  ansible.builtin.stat:
+    path: "{{ apt_upgrade_lock_boot }}"
+  register: apt_upgrade_boot_results
+  when: apt_upgrade_frequency == "boot"
+
+- name: "Upgrade packages"
+  ansible.builtin.apt:
+    upgrade: "{{ apt_upgrade_style }}"
+  when: >-
+    apt_upgrade
+    and (apt_upgrade_frequency == "always"
+    or (apt_upgrade_frequency == "boot" and not
+      (apt_upgrade_boot_results | default(apt_upgrade_fake)).stat.exists)
+    or (apt_upgrade_frequency == "once" and not
+      (apt_upgrade_once_results | default(apt_upgrade_fake)).stat.exists))
+  register: apt_upgrade_results
+
+- name: "Create anxs cache directory"
+  ansible.builtin.file:
+    path: "/var/cache/anxs"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: '0755'
+  when:
+    - apt_upgrade
+    - apt_upgrade_frequency == "once"
+    - apt_upgrade_results is defined
+    - not apt_upgrade_results is skipped
+
+- name: "Note that apt upgrade happened once"
+  ansible.builtin.file:
+    path: "{{ apt_upgrade_lock_once }}"
+    state: "touch"
+    mode: '0644'
+  when:
+    - apt_upgrade
+    - apt_upgrade_frequency == "once"
+    - apt_upgrade_results is defined
+    - not apt_upgrade_results is skipped
+
+- name: "Note that apt upgrade happened this boot"
+  ansible.builtin.file:
+    path: "{{ apt_upgrade_lock_boot }}"
+    state: "touch"
+    mode: '0644'
+  when:
+    - apt_upgrade
+    - apt_upgrade_frequency == "boot"
+    - apt_upgrade_results is defined
+    - not apt_upgrade_results is skipped
+
+- name: "Remove packages that are no longer needed for dependencies"
+  ansible.builtin.apt:
+    autoremove: true
   when: apt_autoremove
 
-- name: APT | Remove .deb files for packages no longer on your system
-  apt:
-    autoclean: "yes"
+- name: "Remove .deb files for packages no longer on your system"
+  ansible.builtin.apt:
+    autoclean: true
   when: apt_autoclean
 
-- name: APT | Check for cached .deb files
-  shell: "ls /var/cache/apt/archives/*.deb 2&> /dev/null | wc -l"
+- name: "Check for cached .deb files"
+  ansible.builtin.find:
+    paths: /var/cache/apt/archives
+    patterns: "*.deb"
+    file_type: file
+    recurse: false
   register: apt_cache_check
-  changed_when: no
+  changed_when: false
   when: apt_clean
 
-- name: APT | Remove all cached .deb files
-  shell: apt-get -y clean
-  changed_when: apt_cache_check.stdout != "0"
-  when: apt_clean and apt_cache_check.stdout != "0"
+- name: "Remove all cached .deb files"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ apt_cache_check.files | default([]) }}"
+  when: apt_clean and (apt_cache_check.matched | default(0)) > 0
 
-- name: APT | Update the general configuration (/etc/apt/apt.conf.d/10general)
-  template:
-    src: etc_apt_apt.conf.d_10general.j2
-    dest: /etc/apt/apt.conf.d/10general
-    owner: root
-    group: root
-    mode: 0644
+- name: "Update the general configuration (/etc/apt/apt.conf.d/10general)"
+  ansible.builtin.template:
+    src: "etc_apt_apt.conf.d_10general.j2"
+    dest: "/etc/apt/apt.conf.d/10general"
+    owner: "root"
+    group: "root"
+    mode: "0644"
 
-- name: APT | Make sure the required packages are installed 20.04 and above
-  set_fact:
-    apt_packages_list: "{{ apt_default_packages | union (apt_default_packages_post20) | unique }}"
-  when: ansible_facts['distribution_version'] is version('20.04', '>=')
-
-- name: APT | Make sure the required packages are installed 19.10 and below
-  set_fact:
-    apt_packages_list: "{{ apt_default_packages | union (apt_default_packages_pre20) | unique }}"
-  when: ansible_facts['distribution_version'] is version('20.04', '<')
-
-- name: APT | Install Packages
-  apt:
-    pkg: "{{apt_packages_list}}"
-    state: present
+- name: "Make sure the required packages are installed"
+  ansible.builtin.apt:
+    name: "{{ apt_default_packages }}"
+    state: "present"

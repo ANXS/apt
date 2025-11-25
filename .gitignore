@@ -5,7 +5,11 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
-.vagrant
-test
-.history
-.vscode
+.ci-env
+.ansible
+__pycache__
+molecule*.log
+.act/
+.#*
+*.*#
+.molecule-state/

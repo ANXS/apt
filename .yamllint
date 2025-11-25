@@ -1,0 +1,10 @@
+---
+extends: default
+rules:
+  line-length:
+    max: 120
+    level: warning
+
+# Ignore editor temporary/lock files (e.g. Emacs .#* files) that can appear in molecule dirs
+ignore: |
+  **/.#*

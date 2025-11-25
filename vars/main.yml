@@ -1,0 +1,15 @@
+---
+apt_default_packages:
+  - "python3-apt"
+  - "unattended-upgrades"
+  - "apt-transport-https"
+  - "curl"
+  - "ca-certificates"
+  - "software-properties-common"
+  - "python3-debian"
+
+apt_upgrade_lock_boot: "/var/run/anxs-apt-upgrade"
+apt_upgrade_lock_once: "/var/cache/anxs/apt-upgrade"
+apt_upgrade_fake:
+  stat:
+    exists: false
