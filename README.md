@@ -1,7 +1,7 @@
 ## [ANXS](http://anxs.io/) - apt
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/anxs/apt/ci.yml)
-![Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
+![Maintenance](https://img.shields.io/maintenance/yes/2026.svg)
 ![Ansible Role](https://img.shields.io/ansible/role/d/anxs/apt)
 ![GitHub License](https://img.shields.io/github/license/anxs/apt)
 

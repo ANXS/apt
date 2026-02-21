@@ -127,3 +127,15 @@
   ansible.builtin.apt:
     name: "{{ apt_default_packages }}"
     state: "present"
+
+- name: "Check if software-properties-common is available"
+  ansible.builtin.command: apt-cache show software-properties-common
+  register: apt_spc_check
+  failed_when: false
+  changed_when: false
+
+- name: "Install software-properties-common when available"
+  ansible.builtin.apt:
+    name: "software-properties-common"
+    state: "present"
+  when: apt_spc_check.rc == 0

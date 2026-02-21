@@ -1,3 +1,4 @@
+---
 name: Molecule CI
 
 on:
@@ -9,21 +10,26 @@ on:
     branches:
       - "master"
       - "main"
+  workflow_dispatch:
 
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.13'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
+
       - name: Run lint
         run: make lint
 
@@ -35,24 +41,26 @@ jobs:
       fail-fast: false
       matrix:
         os: [debian, ubuntu]
-        version: ['12', '2204', '2404']
+        version: ['11', '12', '13', '2004', '2204', '2404']
         upgrade: ['false', 'true']
         style: ['safe', 'full', 'dist']
         frequency: ['once', 'boot', 'always']
 
-        # Exclude invalid OS/version combinations
         exclude:
-          # Debian only has version 12
+          - os: debian
+            version: '2004'
           - os: debian
             version: '2204'
           - os: debian
             version: '2404'
-          # Ubuntu doesn't have version 12
+          - os: ubuntu
+            version: '11'
           - os: ubuntu
             version: '12'
+          - os: ubuntu
+            version: '13'
 
           # When upgrade is false, only test one combination of style/frequency
-          # (since they don't apply when upgrade is disabled)
           - upgrade: 'false'
             style: 'full'
           - upgrade: 'false'
@@ -62,11 +70,19 @@ jobs:
           - upgrade: 'false'
             frequency: 'always'
 
-        # Add the image mapping based on OS and version
         include:
+          - os: debian
+            version: '11'
+            image: geerlingguy/docker-debian11-ansible:latest
           - os: debian
             version: '12'
             image: geerlingguy/docker-debian12-ansible:latest
+          - os: debian
+            version: '13'
+            image: geerlingguy/docker-debian13-ansible:latest
+          - os: ubuntu
+            version: '2004'
+            image: geerlingguy/docker-ubuntu2004-ansible:latest
           - os: ubuntu
             version: '2204'
             image: geerlingguy/docker-ubuntu2204-ansible:latest
@@ -75,12 +91,13 @@ jobs:
             image: geerlingguy/docker-ubuntu2404-ansible:latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
       - name: Install dependencies
         run: |

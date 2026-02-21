@@ -3,7 +3,7 @@ molecule>=25.9.0
 molecule-plugins[docker]>=23.5.0
 
 # Ansible ecosystem
-ansible>=8.0.0
+ansible>=8.0.0,<12
 ansible-lint>=6.22.0
 
 # Python testing
