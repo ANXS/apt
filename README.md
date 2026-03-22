@@ -26,6 +26,10 @@ This is a partial listing of configurable variables.
 
 This project uses molecule to test a few scenarios. You can kick off the tests (and linting) with `make test`.
 
+## Note on AI Usage
+
+This project has been developed with AI assistance. Contributions making use of AI generated content are welcome, however they _must_ be human reviewed prior to submission as pull requests, or issues. All contributors must be able to fully explain and defend any AI generated code, documentation, issues, or tests they submit. Contributions making use of AI must have this explicitly declared in the pull request or issue. This also applies to utilization of AI for reviewing of pull requests.
+
 #### Feedback, bug-reports, requests, ...
 
 Are [welcome](https://github.com/ANXS/apt/issues)!
