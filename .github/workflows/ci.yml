@@ -1,7 +1,7 @@
 ---
 name: Molecule CI
 
-on:
+'on':
   pull_request:
     branches:
       - "master"
@@ -34,14 +34,16 @@ jobs:
         run: make lint
 
   test:
-    name: Test ${{ matrix.os }}-${{ matrix.version }} (upgrade=${{ matrix.upgrade }}, style=${{ matrix.style }}, freq=${{ matrix.frequency }})
+    name: >-
+      Test ${{ matrix.os }}-${{ matrix.version }}
+      (upgrade=${{ matrix.upgrade }}, style=${{ matrix.style }}, freq=${{ matrix.frequency }})
     runs-on: ubuntu-latest
     needs: lint
     strategy:
       fail-fast: false
       matrix:
         os: [debian, ubuntu]
-        version: ['11', '12', '13', '2004', '2204', '2404']
+        version: ['12', '13', '2004', '2204', '2404']
         upgrade: ['false', 'true']
         style: ['safe', 'full', 'dist']
         frequency: ['once', 'boot', 'always']
@@ -53,8 +55,6 @@ jobs:
             version: '2204'
           - os: debian
             version: '2404'
-          - os: ubuntu
-            version: '11'
           - os: ubuntu
             version: '12'
           - os: ubuntu
@@ -71,9 +71,6 @@ jobs:
             frequency: 'always'
 
         include:
-          - os: debian
-            version: '11'
-            image: geerlingguy/docker-debian11-ansible:latest
           - os: debian
             version: '12'
             image: geerlingguy/docker-debian12-ansible:latest

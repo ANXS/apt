@@ -1,0 +1,98 @@
+---
+- name: "Validate unattended-upgrades policy"
+  ansible.builtin.assert:
+    that:
+      - apt_unattended_upgrades is none or apt_unattended_upgrades is boolean
+      - >-
+        apt_daily_timer_on_calendar is none
+        or (apt_daily_timer_on_calendar is sequence
+        and apt_daily_timer_on_calendar is not string
+        and apt_daily_timer_on_calendar | length > 0)
+      - >-
+        apt_daily_upgrade_timer_on_calendar is none
+        or (apt_daily_upgrade_timer_on_calendar is sequence
+        and apt_daily_upgrade_timer_on_calendar is not string
+        and apt_daily_upgrade_timer_on_calendar | length > 0)
+      - >-
+        apt_daily_timer_randomized_delay_sec is none
+        or (apt_daily_timer_randomized_delay_sec is string
+        and apt_daily_timer_randomized_delay_sec | length > 0)
+      - >-
+        apt_daily_upgrade_timer_randomized_delay_sec is none
+        or (apt_daily_upgrade_timer_randomized_delay_sec is string
+        and apt_daily_upgrade_timer_randomized_delay_sec | length > 0)
+
+- name: "Write unattended-upgrades policy override"
+  ansible.builtin.template:
+    src: "etc_apt_apt.conf.d_52anxs-apt-unattended-upgrades.j2"
+    dest: "/etc/apt/apt.conf.d/52anxs-apt-unattended-upgrades"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  when: apt_unattended_upgrades is not none
+
+- name: "Remove unmanaged unattended-upgrades policy override"
+  ansible.builtin.file:
+    path: "/etc/apt/apt.conf.d/52anxs-apt-unattended-upgrades"
+    state: absent
+  when: apt_unattended_upgrades is none
+
+- name: "Create APT timer override directories"
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item.unit }}.d"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop:
+    - unit: "apt-daily.timer"
+      on_calendar: "{{ apt_daily_timer_on_calendar }}"
+      randomized_delay_sec: "{{ apt_daily_timer_randomized_delay_sec }}"
+    - unit: "apt-daily-upgrade.timer"
+      on_calendar: "{{ apt_daily_upgrade_timer_on_calendar }}"
+      randomized_delay_sec: "{{ apt_daily_upgrade_timer_randomized_delay_sec }}"
+  when: item.on_calendar is not none or item.randomized_delay_sec is not none
+
+- name: "Write APT timer overrides"
+  ansible.builtin.template:
+    src: "apt-timer-override.conf.j2"
+    dest: "/etc/systemd/system/{{ item.unit }}.d/anxs-apt.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop:
+    - unit: "apt-daily.timer"
+      on_calendar: "{{ apt_daily_timer_on_calendar }}"
+      randomized_delay_sec: "{{ apt_daily_timer_randomized_delay_sec }}"
+    - unit: "apt-daily-upgrade.timer"
+      on_calendar: "{{ apt_daily_upgrade_timer_on_calendar }}"
+      randomized_delay_sec: "{{ apt_daily_upgrade_timer_randomized_delay_sec }}"
+  when: item.on_calendar is not none or item.randomized_delay_sec is not none
+  register: apt_timer_overrides
+
+- name: "Remove unmanaged APT timer overrides"
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item.unit }}.d/anxs-apt.conf"
+    state: absent
+  loop:
+    - unit: "apt-daily.timer"
+      on_calendar: "{{ apt_daily_timer_on_calendar }}"
+      randomized_delay_sec: "{{ apt_daily_timer_randomized_delay_sec }}"
+    - unit: "apt-daily-upgrade.timer"
+      on_calendar: "{{ apt_daily_upgrade_timer_on_calendar }}"
+      randomized_delay_sec: "{{ apt_daily_upgrade_timer_randomized_delay_sec }}"
+  when: item.on_calendar is none and item.randomized_delay_sec is none
+  register: apt_timer_override_removals
+
+- name: "Reload systemd after APT timer policy changes"
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: apt_timer_overrides is changed or apt_timer_override_removals is changed
+
+- name: "Apply unattended-upgrades timer policy"
+  ansible.builtin.systemd:
+    name: "apt-daily-upgrade.timer"
+    enabled: "{{ apt_unattended_upgrades }}"
+    masked: false
+    state: "{{ 'started' if apt_unattended_upgrades else 'stopped' }}"
+  when: apt_unattended_upgrades is not none

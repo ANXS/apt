@@ -1,5 +1,5 @@
-.PHONY: lint test test-all test-debian11 test-debian12 test-debian13 test-ubuntu2004 test-ubuntu2204 test-ubuntu2404 \
-	test-matrix test-matrix-debian11 test-matrix-debian12 test-matrix-debian13 \
+.PHONY: lint test test-all test-debian12 test-debian13 test-ubuntu2004 test-ubuntu2204 test-ubuntu2404 \
+	test-matrix test-matrix-debian12 test-matrix-debian13 \
 	test-matrix-ubuntu2004 test-matrix-ubuntu2204 test-matrix-ubuntu2404 \
 	act act-download clean distclean
 
@@ -20,22 +20,18 @@ lint: $(VENV)
 test: lint test-all
 
 # OS-Specific Quick Tests (upgrade disabled)
-test-debian11: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-quick \
-		MOLECULE_SCENARIO_NAME=debian11-quick \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		$(BIN)/molecule test
-
 test-debian13: $(VENV)
 	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian13-quick \
 		MOLECULE_SCENARIO_NAME=debian13-quick \
 		MOLECULE_OS=debian MOLECULE_VERSION=13 MOLECULE_IMAGE=geerlingguy/docker-debian13-ansible:latest \
+		APT_UNATTENDED_UPGRADES=true APT_MANAGE_TIMER_SCHEDULE=true \
 		$(BIN)/molecule test
 
 test-debian12: $(VENV)
 	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian12-quick \
 		MOLECULE_SCENARIO_NAME=debian12-quick \
 		MOLECULE_OS=debian MOLECULE_VERSION=12 MOLECULE_IMAGE=geerlingguy/docker-debian12-ansible:latest \
+		APT_UNATTENDED_UPGRADES=false APT_MANAGE_TIMER_SCHEDULE=true \
 		$(BIN)/molecule test
 
 test-ubuntu2004: $(VENV)
@@ -56,100 +52,17 @@ test-ubuntu2404: $(VENV)
 		MOLECULE_OS=ubuntu MOLECULE_VERSION=2404 MOLECULE_IMAGE=geerlingguy/docker-ubuntu2404-ansible:latest \
 		$(BIN)/molecule test
 
-test-all: test-debian11 test-debian12 test-debian13 test-ubuntu2004 test-ubuntu2204 test-ubuntu2404
+test-all: test-debian12 test-debian13 test-ubuntu2004 test-ubuntu2204 test-ubuntu2404
 
 #
 # Comprehensive Test Matrix
 # -------------------------
 # Tests all combinations of OS x upgrade settings
-# 6 OS x 10 configs = 60 scenarios
+# 5 OS x 10 configs = 50 scenarios
 #
 
-test-matrix: test-matrix-debian11 test-matrix-debian12 test-matrix-debian13 \
+test-matrix: test-matrix-debian12 test-matrix-debian13 \
 	test-matrix-ubuntu2004 test-matrix-ubuntu2204 test-matrix-ubuntu2404
-
-# --- Debian 11 ---
-test-matrix-debian11: \
-	test-debian11-upgrade-false \
-	test-debian11-safe-once \
-	test-debian11-safe-boot \
-	test-debian11-safe-always \
-	test-debian11-full-once \
-	test-debian11-full-boot \
-	test-debian11-full-always \
-	test-debian11-dist-once \
-	test-debian11-dist-boot \
-	test-debian11-dist-always
-
-test-debian11-upgrade-false: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-upgrade-false \
-		MOLECULE_SCENARIO_NAME=debian11-upgrade-false \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=false \
-		$(BIN)/molecule test
-
-test-debian11-safe-once: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-safe-once \
-		MOLECULE_SCENARIO_NAME=debian11-safe-once \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=safe APT_UPGRADE_FREQUENCY=once \
-		$(BIN)/molecule test
-
-test-debian11-safe-boot: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-safe-boot \
-		MOLECULE_SCENARIO_NAME=debian11-safe-boot \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=safe APT_UPGRADE_FREQUENCY=boot \
-		$(BIN)/molecule test
-
-test-debian11-safe-always: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-safe-always \
-		MOLECULE_SCENARIO_NAME=debian11-safe-always \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=safe APT_UPGRADE_FREQUENCY=always \
-		$(BIN)/molecule test
-
-test-debian11-full-once: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-full-once \
-		MOLECULE_SCENARIO_NAME=debian11-full-once \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=full APT_UPGRADE_FREQUENCY=once \
-		$(BIN)/molecule test
-
-test-debian11-full-boot: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-full-boot \
-		MOLECULE_SCENARIO_NAME=debian11-full-boot \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=full APT_UPGRADE_FREQUENCY=boot \
-		$(BIN)/molecule test
-
-test-debian11-full-always: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-full-always \
-		MOLECULE_SCENARIO_NAME=debian11-full-always \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=full APT_UPGRADE_FREQUENCY=always \
-		$(BIN)/molecule test
-
-test-debian11-dist-once: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-dist-once \
-		MOLECULE_SCENARIO_NAME=debian11-dist-once \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=dist APT_UPGRADE_FREQUENCY=once \
-		$(BIN)/molecule test
-
-test-debian11-dist-boot: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-dist-boot \
-		MOLECULE_SCENARIO_NAME=debian11-dist-boot \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=dist APT_UPGRADE_FREQUENCY=boot \
-		$(BIN)/molecule test
-
-test-debian11-dist-always: $(VENV)
-	MOLECULE_EPHEMERAL_DIRECTORY=.molecule-state/debian11-dist-always \
-		MOLECULE_SCENARIO_NAME=debian11-dist-always \
-		MOLECULE_OS=debian MOLECULE_VERSION=11 MOLECULE_IMAGE=geerlingguy/docker-debian11-ansible:latest \
-		APT_UPGRADE=true APT_UPGRADE_STYLE=dist APT_UPGRADE_FREQUENCY=always \
-		$(BIN)/molecule test
 
 # --- Debian 12 ---
 test-matrix-debian12: \

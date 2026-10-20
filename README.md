@@ -10,7 +10,7 @@ Ansible role for managing the APT package cache, cleaning up unneeded packages a
 ## Requirements & Dependencies
 
 * Ansible 2.13 or higher.
-* Ubuntu 20.04+ or Debian 11+.
+* Ubuntu 20.04+ or Debian 12+.
 
 ## Variables
 
@@ -20,8 +20,12 @@ Some commonly adjusted variables. See [`defaults/main.yml`](https://github.com/A
   * `apt_upgrade_style` (default `safe`) controls the upgrade method. Other options are `full` and `dist`.
   * `apt_upgrade_frequency` (default `once`) affects how often the upgrade is run. Other options are `always` and (once per) `boot`.
 * `apt_install_recommends` / `apt_install_suggests` (both default to `false`) allow installing recommended or suggested packages.
-* `apt_autoremove` (default `true`) for  removing packages that are no longer needed/
-* `apt_cache_valid_time` (default `3600`) to control how often APT cache is refreshed.
+* `apt_autoremove` (default `true`) removes packages that are no longer needed.
+* `apt_autoremove_packages` (default `[]`) marks installed manual packages as automatic before autoremove. Packages that are absent or still required are retained.
+* `apt_cache_valid_time` (default `3600`) controls how often the APT cache is refreshed.
+* `apt_unattended_upgrades` (default `null`) preserves the distribution policy. Set it to `true` or `false` to enable or disable automatic upgrade execution explicitly.
+* `apt_daily_timer_on_calendar` / `apt_daily_upgrade_timer_on_calendar` (default `null`) replace the corresponding systemd timer's `OnCalendar` entries when set to a list.
+* `apt_daily_timer_randomized_delay_sec` / `apt_daily_upgrade_timer_randomized_delay_sec` (default `null`) override each timer's randomized delay.
 
 ## Testing
 

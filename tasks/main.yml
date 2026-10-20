@@ -88,6 +88,46 @@
     - apt_upgrade_results is defined
     - not apt_upgrade_results is skipped
 
+- name: "Validate explicit autoremove packages"
+  ansible.builtin.assert:
+    that:
+      - apt_autoremove_packages is sequence
+      - apt_autoremove_packages is not string
+      - apt_autoremove_packages | unique | length == apt_autoremove_packages | length
+      - apt_autoremove_packages | reject('match', '^[a-z0-9][a-z0-9+.-]*(?::[a-z0-9]+)?$') | list | length == 0
+  when: apt_autoremove_packages | length > 0
+
+- name: "Gather installed package facts for explicit autoremove"
+  ansible.builtin.package_facts:
+    manager: apt
+  when:
+    - apt_autoremove
+    - apt_autoremove_packages | length > 0
+
+- name: "Read manually installed packages"
+  ansible.builtin.command:
+    argv:
+      - apt-mark
+      - showmanual
+  register: apt_manual_packages
+  changed_when: false
+  when:
+    - apt_autoremove
+    - apt_autoremove_packages | length > 0
+
+- name: "Mark explicit autoremove packages as automatic"
+  ansible.builtin.command:
+    argv:
+      - apt-mark
+      - auto
+      - "{{ item }}"
+  loop: "{{ apt_autoremove_packages }}"
+  changed_when: true
+  when:
+    - apt_autoremove
+    - item in ansible_facts.packages
+    - item in apt_manual_packages.stdout_lines
+
 - name: "Remove packages that are no longer needed for dependencies"
   ansible.builtin.apt:
     autoremove: true
@@ -127,6 +167,9 @@
   ansible.builtin.apt:
     name: "{{ apt_default_packages }}"
     state: "present"
+
+- name: "Configure unattended upgrades"
+  ansible.builtin.include_tasks: unattended-upgrades.yml
 
 - name: "Check if software-properties-common is available"
   ansible.builtin.command: apt-cache show software-properties-common

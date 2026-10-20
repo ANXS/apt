@@ -7,5 +7,48 @@
     apt_upgrade: "{{ lookup('env', 'APT_UPGRADE') | default('false', true) | bool }}"
     apt_upgrade_style: "{{ lookup('env', 'APT_UPGRADE_STYLE') | default('safe', true) }}"
     apt_upgrade_frequency: "{{ lookup('env', 'APT_UPGRADE_FREQUENCY') | default('once', true) }}"
+    apt_autoremove_packages:
+      - tree
+      - anxs-apt-not-installed
+  pre_tasks:
+    - name: Set explicit unattended-upgrades policy
+      ansible.builtin.set_fact:
+        apt_unattended_upgrades: "{{ lookup('env', 'APT_UNATTENDED_UPGRADES') | bool }}"
+      when: lookup('env', 'APT_UNATTENDED_UPGRADES') != 'preserve'
+
+    - name: Set explicit APT timer schedules
+      ansible.builtin.set_fact:
+        apt_daily_timer_on_calendar:
+          - "{{ lookup('env', 'APT_DAILY_TIMER_ON_CALENDAR') }}"
+        apt_daily_timer_randomized_delay_sec: "{{ lookup('env', 'APT_DAILY_TIMER_RANDOMIZED_DELAY_SEC') }}"
+        apt_daily_upgrade_timer_on_calendar:
+          - "{{ lookup('env', 'APT_DAILY_UPGRADE_TIMER_ON_CALENDAR') }}"
+        apt_daily_upgrade_timer_randomized_delay_sec: >-
+          {{ lookup('env', 'APT_DAILY_UPGRADE_TIMER_RANDOMIZED_DELAY_SEC') }}
+      when: lookup('env', 'APT_MANAGE_TIMER_SCHEDULE') | bool
+
+    - name: Check whether the explicit autoremove fixture was installed
+      ansible.builtin.stat:
+        path: /var/tmp/anxs-apt-autoremove-fixture
+      register: apt_autoremove_fixture
+
+    - name: Refresh apt metadata for the explicit autoremove fixture
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 0
+      when: not apt_autoremove_fixture.stat.exists
+
+    - name: Install the explicit autoremove fixture
+      ansible.builtin.apt:
+        name: tree
+        state: present
+      when: not apt_autoremove_fixture.stat.exists
+
+    - name: Record the explicit autoremove fixture installation
+      ansible.builtin.file:
+        path: /var/tmp/anxs-apt-autoremove-fixture
+        state: touch
+        mode: "0644"
+      when: not apt_autoremove_fixture.stat.exists
   roles:
     - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(playbook_dir + '/../..', true) }}"

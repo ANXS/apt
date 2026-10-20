@@ -20,6 +20,51 @@ def test_default_packages_installed(host):
         assert p.is_installed
 
 
+def test_explicit_autoremove_packages(host):
+    assert not host.package('tree').is_installed
+
+
+def test_unattended_upgrades_configuration(host):
+    policy = os.environ.get('APT_UNATTENDED_UPGRADES', 'preserve').lower()
+    config = host.file('/etc/apt/apt.conf.d/52anxs-apt-unattended-upgrades')
+    if policy == 'preserve':
+        assert not config.exists
+        return
+
+    assert config.exists
+    assert config.user == 'root'
+    assert config.group == 'root'
+    assert config.mode == 0o644
+    expected = '1' if policy == 'true' else '0'
+    assert f'APT::Periodic::Unattended-Upgrade "{expected}";' in config.content_string
+
+
+def test_apt_timer_policy(host):
+    policy = os.environ.get('APT_UNATTENDED_UPGRADES', 'preserve').lower()
+    if policy != 'preserve':
+        enabled = policy == 'true'
+        upgrade_timer = host.service('apt-daily-upgrade.timer')
+        assert upgrade_timer.is_enabled is enabled
+        assert upgrade_timer.is_running is enabled
+
+    manage_schedule = os.environ.get('APT_MANAGE_TIMER_SCHEDULE', 'false').lower() == 'true'
+    update_override = host.file('/etc/systemd/system/apt-daily.timer.d/anxs-apt.conf')
+    upgrade_override = host.file('/etc/systemd/system/apt-daily-upgrade.timer.d/anxs-apt.conf')
+    if not manage_schedule:
+        assert not update_override.exists
+        assert not upgrade_override.exists
+        return
+
+    update_schedule = os.environ['APT_DAILY_TIMER_ON_CALENDAR']
+    update_delay = os.environ['APT_DAILY_TIMER_RANDOMIZED_DELAY_SEC']
+    upgrade_schedule = os.environ['APT_DAILY_UPGRADE_TIMER_ON_CALENDAR']
+    upgrade_delay = os.environ['APT_DAILY_UPGRADE_TIMER_RANDOMIZED_DELAY_SEC']
+    assert f'OnCalendar={update_schedule}' in update_override.content_string
+    assert f'RandomizedDelaySec={update_delay}' in update_override.content_string
+    assert f'OnCalendar={upgrade_schedule}' in upgrade_override.content_string
+    assert f'RandomizedDelaySec={upgrade_delay}' in upgrade_override.content_string
+
+
 def test_apt_update_cached(host):
     cmd = host.run('apt-cache policy')
     assert cmd.rc == 0

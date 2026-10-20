@@ -5,6 +5,7 @@ apt_cache_valid_time: 3600                   # Time (in seconds) the apt cache s
 apt_install_recommends: false                # whether or not to install the "recommended" packages
 apt_install_suggests: false                  # whether or not to install the "suggested" packages
 apt_autoremove: true                         # remove packages that are no longer needed for dependencies
+apt_autoremove_packages: []                  # mark installed manual packages automatic before autoremove
 apt_clean: false                             # remove all cached .deb files
 apt_autoremove_recommends: true              # whether to automatically remove "recommended" packages
 apt_autoremove_suggests: true                # whether to automatically remove "suggested" packages
@@ -13,3 +14,12 @@ apt_source: false                            # include apt source repos
 apt_upgrade: false                           # perform some automatic upgrades
 apt_upgrade_style: "safe"                    # or "full" or "dist"
 apt_upgrade_frequency: "once"                # or "boot" or "always"
+
+# null preserves the distribution policy; true or false makes this role own it.
+apt_unattended_upgrades: null
+
+# null preserves each distribution timer setting. A list replaces OnCalendar.
+apt_daily_timer_on_calendar: null
+apt_daily_timer_randomized_delay_sec: null
+apt_daily_upgrade_timer_on_calendar: null
+apt_daily_upgrade_timer_randomized_delay_sec: null

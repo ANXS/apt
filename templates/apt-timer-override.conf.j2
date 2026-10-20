@@ -1,0 +1,10 @@
+[Timer]
+{% if item.on_calendar is not none %}
+OnCalendar=
+{% for schedule in item.on_calendar %}
+OnCalendar={{ schedule }}
+{% endfor %}
+{% endif %}
+{% if item.randomized_delay_sec is not none %}
+RandomizedDelaySec={{ item.randomized_delay_sec }}
+{% endif %}
